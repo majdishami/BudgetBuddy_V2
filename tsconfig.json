@@ -1,27 +1,38 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
     "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "strict": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "jsx": "preserve",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
-    "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./client/src/*"],
-      "@hooks/*": ["./client/src/hooks/*"],
-      "@components/*": ["./client/src/components/*"],
-      "@lib/*": ["./client/src/lib/*"],
-      "@shared/*": ["./shared/*"]
-    }
-  }
+      "@server/*": ["./server/*"]
+    },
+    "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./client/node_modules/vite/types"
+    ],
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsbuildinfo"
+  },
+  "include": [
+    "client/src/**/*",
+    "server/**/*",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

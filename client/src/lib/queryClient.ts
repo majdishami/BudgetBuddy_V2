@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Validate and type environment variables
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 if (!BACKEND_URL) {
   throw new Error("VITE_BACKEND_URL environment variable is not set");
@@ -7,28 +8,40 @@ if (!BACKEND_URL) {
 
 console.log(`Backend URL: ${BACKEND_URL}`);
 
-async function throwIfResNotOk(res: Response) {
+// Enhanced error handling utility
+async function throwIfResNotOk(res: Response): Promise<void> {
   if (!res.ok) {
-    const text = (await res.clone().text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    let errorMessage = `${res.status}: ${res.statusText}`;
+    try {
+      const errorData = await res.clone().json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      const text = await res.clone().text();
+      if (text) errorMessage = `${res.status}: ${text}`;
+    }
+    throw new Error(errorMessage);
   }
 }
 
-export type ApiRequestParams<T = any> = {
+// Strongly typed API request parameters
+export type ApiRequestParams<T = unknown> = {
   url: string;
-  method: "GET" | "POST" | "PUT" | "DELETE";
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   headers?: Record<string, string>;
   body?: T;
+  signal?: AbortSignal;
 };
 
-export async function apiRequest<T = any, U = any>({ 
-  url, 
-  method, 
-  headers, 
-  body 
+// Core API request function with enhanced typing
+export async function apiRequest<T = unknown, U = unknown>({
+  url,
+  method,
+  headers,
+  body,
+  signal
 }: ApiRequestParams<U>): Promise<T> {
   const fullUrl = `${BACKEND_URL}${url}`;
-  console.log(`Making API request to ${fullUrl} with method ${method}`);
+  console.debug(`API Request: ${method} ${fullUrl}`);
 
   try {
     const res = await fetch(fullUrl, {
@@ -39,30 +52,31 @@ export async function apiRequest<T = any, U = any>({
       },
       body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
+      signal,
     });
 
     await throwIfResNotOk(res);
 
     const contentType = res.headers.get("content-type");
     if (contentType?.includes("application/json")) {
-      return await res.json();
+      return (await res.json()) as T;
     }
     
-    return await res.text() as unknown as T;
+    return (await res.text()) as unknown as T;
   } catch (error) {
-    console.error(`API request failed for ${fullUrl}:`, error);
-    throw error;
+    console.error(`API Request Failed (${method} ${url}):`, error);
+    throw error instanceof Error ? error : new Error('Unknown API error occurred');
   }
 }
 
-// Properly typed getQueryFn with generic parameter
+// Typed query function factory
 export function getQueryFn<T>(options: {
-  on401: "returnNull" | "throw";
-}): QueryFunction<T> {
+  on401?: "returnNull" | "throw";
+} = { on401: "throw" }): QueryFunction<T> {
   return async ({ queryKey, signal }) => {
     const relativeUrl = queryKey[0] as string;
     const fullUrl = `${BACKEND_URL}${relativeUrl}`;
-    console.log("Fetching:", fullUrl);
+    console.debug(`Query Fetching: ${fullUrl}`);
 
     try {
       const res = await fetch(fullUrl, {
@@ -77,51 +91,54 @@ export function getQueryFn<T>(options: {
       await throwIfResNotOk(res);
       
       const contentType = res.headers.get("content-type");
-      if (contentType?.includes("application/json")) {
-        return await res.json();
-      }
-      
-      return await res.text() as unknown as T;
+      return contentType?.includes("application/json")
+        ? res.json()
+        : res.text();
     } catch (error) {
-      console.error(`API Error for ${fullUrl}:`, error);
+      console.error(`Query Error (${relativeUrl}):`, error);
       throw error;
     }
   };
 }
 
-// Example fetch functions with proper typing
-export const fetchExpenses = async (): Promise<Expense[]> => {
+// Domain-specific query functions
+export const fetchExpenses = async (signal?: AbortSignal): Promise<Expense[]> => {
   return apiRequest<Expense[]>({ 
     url: '/api/expenses', 
-    method: 'GET' 
+    method: 'GET',
+    signal
   });
 };
 
-export const fetchIncomes = async (): Promise<Income[]> => {
+export const fetchIncomes = async (signal?: AbortSignal): Promise<Income[]> => {
   return apiRequest<Income[]>({ 
     url: '/api/incomes', 
-    method: 'GET' 
+    method: 'GET',
+    signal
   });
 };
 
-export const fetchCategories = async (): Promise<Category[]> => {
-  console.log('Fetching categories...');
+export const fetchCategories = async (signal?: AbortSignal): Promise<Category[]> => {
   const data = await apiRequest<Category[]>({ 
     url: '/api/categories', 
-    method: 'GET' 
+    method: 'GET',
+    signal
   });
-  console.log('Fetched categories:', data);
+  console.debug('Fetched categories count:', data.length);
   return data;
 };
 
-// Optimized query client configuration
+// Configured query client instance
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       retry: (failureCount, error) => {
-        if ((error as Error).message.includes('401')) return false;
-        return failureCount < 2;
+        const err = error as Error;
+        if (err.message.includes('401') || err.message.includes('403')) {
+          return false;
+        }
+        return failureCount < 3;
       },
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
@@ -158,26 +175,26 @@ interface Category {
   icon?: string;
 }
 
-// Utility functions
-export const apiPost = async <T = any, U = any>(url: string, body: U): Promise<T> => {
-  return apiRequest<T, U>({
-    url,
-    method: 'POST',
-    body
-  });
-};
+// CRUD utility functions
+export const apiPost = async <T = unknown, U = unknown>(
+  url: string, 
+  body: U,
+  signal?: AbortSignal
+): Promise<T> => apiRequest<T, U>({ url, method: 'POST', body, signal });
 
-export const apiPut = async <T = any, U = any>(url: string, body: U): Promise<T> => {
-  return apiRequest<T, U>({
-    url,
-    method: 'PUT',
-    body
-  });
-};
+export const apiPut = async <T = unknown, U = unknown>(
+  url: string, 
+  body: U,
+  signal?: AbortSignal
+): Promise<T> => apiRequest<T, U>({ url, method: 'PUT', body, signal });
 
-export const apiDelete = async <T = any>(url: string): Promise<T> => {
-  return apiRequest<T>({
-    url,
-    method: 'DELETE'
-  });
-};
+export const apiDelete = async <T = unknown>(
+  url: string,
+  signal?: AbortSignal
+): Promise<T> => apiRequest<T>({ url, method: 'DELETE', signal });
+
+export const apiPatch = async <T = unknown, U = unknown>(
+  url: string,
+  body: U,
+  signal?: AbortSignal
+): Promise<T> => apiRequest<T, U>({ url, method: 'PATCH', body, signal });
