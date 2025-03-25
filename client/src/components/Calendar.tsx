@@ -1,5 +1,4 @@
-import React from 'react';
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -10,7 +9,7 @@ import {
   endOfWeek,
   isSameDay,
   parseISO,
-  isWithinInterval
+  isWithinInterval,
 } from "date-fns";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -43,7 +42,7 @@ export default function Calendar({
   onRangeSelect,
   expenses = [],
   incomes = [],
-  className
+  className,
 }: CalendarProps) {
   const activeDate = date ?? dateRange?.start ?? TODAY;
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -58,7 +57,7 @@ export default function Calendar({
     const weeks: Date[][] = [];
     let week: Date[] = [];
 
-    days.forEach(day => {
+    days.forEach((day) => {
       if (week.length === 7) {
         weeks.push(week);
         week = [];
@@ -75,16 +74,17 @@ export default function Calendar({
 
   const transactionsByDate = useMemo(() => {
     const dateMap = new Map<string, { expenses: Expense[]; incomes: Income[] }>();
-    weeks.flat().forEach(day => {
+    weeks.flat().forEach((day) => {
       dateMap.set(format(day, "yyyy-MM-dd"), { expenses: [], incomes: [] });
     });
 
-    incomes.forEach(income => {
+    incomes.forEach((income) => {
       const incomeDate = typeof income.date === "string" ? parseISO(income.date) : income.date;
-      const recurringDates = getRecurringDates(incomeDate, income.frequency, endOfMonth(activeDate))
-        .filter(d => isWithinInterval(d, { start: startOfMonth(activeDate), end: endOfMonth(activeDate) }));
+      const recurringDates = getRecurringDates(incomeDate, income.frequency, endOfMonth(activeDate)).filter((d) =>
+        isWithinInterval(d, { start: startOfMonth(activeDate), end: endOfMonth(activeDate) })
+      );
 
-      recurringDates.forEach(date => {
+      recurringDates.forEach((date) => {
         const key = format(date, "yyyy-MM-dd");
         if (dateMap.has(key)) {
           dateMap.get(key)!.incomes.push({ ...income, date: date.toISOString() });
@@ -92,12 +92,13 @@ export default function Calendar({
       });
     });
 
-    expenses.forEach(expense => {
+    expenses.forEach((expense) => {
       const expenseDate = typeof expense.date === "string" ? parseISO(expense.date) : expense.date;
-      const recurringDates = getRecurringDates(expenseDate, expense.frequency, endOfMonth(activeDate))
-        .filter(d => isWithinInterval(d, { start: startOfMonth(activeDate), end: endOfMonth(activeDate) }));
+      const recurringDates = getRecurringDates(expenseDate, expense.frequency, endOfMonth(activeDate)).filter((d) =>
+        isWithinInterval(d, { start: startOfMonth(activeDate), end: endOfMonth(activeDate) })
+      );
 
-      recurringDates.forEach(date => {
+      recurringDates.forEach((date) => {
         const key = format(date, "yyyy-MM-dd");
         if (dateMap.has(key)) {
           dateMap.get(key)!.expenses.push({ ...expense, date: date.toISOString() });
@@ -138,9 +139,7 @@ export default function Calendar({
             const dayTransactions = transactionsByDate.get(dateKey) || { expenses: [], incomes: [] };
             const isToday = isSameDay(day, TODAY);
 
-            const isInRange = dateRange?.start && dateRange?.end
-              ? isWithinInterval(day, { start: dateRange.start, end: dateRange.end })
-              : false;
+            const isInRange = dateRange?.start && dateRange?.end ? isWithinInterval(day, { start: dateRange.start, end: dateRange.end }) : false;
 
             const isSelected = isSameDay(day, date ?? dateRange?.start ?? TODAY);
 
@@ -153,9 +152,7 @@ export default function Calendar({
                 } ${isSelected ? "bg-accent" : ""} ${isInRange ? "bg-muted" : ""}`}
                 onClick={() => handleClick(day)}
               >
-                <div className={`flex items-center gap-2 mb-2 ${
-                  isToday ? "font-bold text-yellow-900" : ""
-                }`}>
+                <div className={`flex items-center gap-2 mb-2 ${isToday ? "font-bold text-yellow-900" : ""}`}>
                   <span className="font-medium">{format(day, "d")}</span>
                   <span className="text-xs text-muted-foreground">{format(day, "EEE")}</span>
                 </div>

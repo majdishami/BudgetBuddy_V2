@@ -125,20 +125,20 @@ app.get('/api/expenses', async (req, res, next) => {
   try {
     const { year, month, category_id } = req.query;
     let query = 'SELECT * FROM expenses';
-    const params = [];
-    const conditions = [];
+    const params: (string | number)[] = [];
+    const conditions: string[] = [];
 
     if (year) {
       conditions.push(`EXTRACT(YEAR FROM date) = $${conditions.length + 1}`);
-      params.push(year);
+      params.push(year as string);
     }
     if (month) {
       conditions.push(`EXTRACT(MONTH FROM date) = $${conditions.length + 1}`);
-      params.push(month);
+      params.push(month as string);
     }
     if (category_id) {
       conditions.push(`category_id = $${conditions.length + 1}`);
-      params.push(category_id);
+      params.push(category_id as string);
     }
 
     if (conditions.length) {
