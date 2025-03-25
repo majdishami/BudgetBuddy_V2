@@ -139,6 +139,29 @@ app.get('/api/expenses', async (req, res, next) => {
   }
 });
 
+// Incomes endpoints
+app.route('/api/incomes')
+  .get(async (req, res, next) => {
+    try {
+      const result = await pool.query('SELECT * FROM incomes ORDER BY date DESC');
+      res.json(result.rows);
+    } catch (err) {
+      next(err);
+    }
+  })
+  .post(async (req, res, next) => {
+    try {
+      const { amount, source, date } = req.body;
+      const result = await pool.query(
+        'INSERT INTO incomes (amount, source, date) VALUES ($1, $2, $3) RETURNING *',
+        [amount, source, date]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      next(err);
+    }
+  });
+
 // Categories endpoints
 app.route('/api/categories')
   .get(async (req, res, next) => {
