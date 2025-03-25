@@ -1,45 +1,48 @@
 import express, { type Express, Request, Response, NextFunction } from "express";
 import fs from "fs";
-import path, { dirname } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
 import { createServer, Server } from "http";
-import { createServer as createViteServer, createLogger } from "vite";
+import { createServer as createViteServer } from "vite";
 import viteConfig from "../vite.config";
-import { registerRoutes } from "./routes";
 import dotenv from "dotenv";
 import cors from 'cors';
 import pg from 'pg';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 import type { CorsOptions } from 'cors';
 
-// Initialize environment variables
-dotenv.config();
+// First initialize __dirname properly for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Now we can use __dirname safely
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: fs.existsSync(envPath) ? envPath : '.env' });
 
 const { Pool } = pg;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Enhanced logging
+export function log(message: string, source = "SERVER", level: 'info' | 'warn' | 'error' = 'info') {
+  const timestamp = new Date().toISOString();
+  const levelPrefix = level === 'error' ? '❌' : level === 'warn' ? '⚠️' : 'ℹ️';
+  console.log(`${levelPrefix} [${timestamp}] [${source}] ${message}`);
+}
 
-const viteLogger = createLogger();
-
-// Enhanced logging function
-export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+// Validate required environment variables
+const requiredEnvVars = ['DB_USER', 'DB_HOST', 'DB_NAME', 'VITE_BACKEND_URL'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingVars.length > 0) {
+  log(`Missing required environment variables: ${missingVars.join(', ')}`, 'CONFIG', 'error');
+  process.exit(1);
 }
 
 // CORS configuration
 const corsOptions: CorsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.PRODUCTION_URL as string] 
+  origin: process.env.NODE_ENV === 'production'
+    ? [process.env.PRODUCTION_URL!]
     : ['http://localhost:5173', 'http://localhost:5174'],
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 204
@@ -47,61 +50,12 @@ const corsOptions: CorsOptions = {
 
 // Rate limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later'
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests, please try again later'
 });
-
-// Security headers middleware
-const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
-  res.header('X-Content-Type-Options', 'nosniff');
-  res.header('X-Frame-Options', 'DENY');
-  res.header('X-XSS-Protection', '1; mode=block');
-  next();
-};
-
-export async function setupVite(app: Express, server: Server) {
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: { server },
-    allowedHosts: ["*"],
-    server: {
-      port: 5174,
-    },
-  };
-
-  const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
-    customLogger: {
-      ...viteLogger,
-      error: (msg, options) => {
-        viteLogger.error(msg, options);
-        process.exit(1);
-      },
-    },
-    server: serverOptions,
-    appType: "custom",
-  });
-
-  app.use(vite.middlewares);
-}
-
-export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
-
-  if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
-  }
-
-  app.use(express.static(distPath));
-
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
-  });
-}
 
 // Initialize Express app
 const app: Express = express();
@@ -109,118 +63,171 @@ const server = createServer(app);
 
 // Database configuration
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'financial_management',
-  password: process.env.DB_PASSWORD,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD || '',
   port: parseInt(process.env.DB_PORT || '5432'),
-  connectionTimeoutMillis: 5000,
+  max: 20,
   idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
 
 // Test database connection
 pool.query('SELECT NOW()')
-  .then(() => log('Database connected successfully', 'database'))
+  .then(() => log('Database connected successfully', 'DATABASE'))
   .catch((err: Error) => {
-    log(`Database connection error: ${err.message}`, 'database');
+    log(`Database connection error: ${err.message}`, 'DATABASE', 'error');
     process.exit(1);
   });
 
-// Middleware pipeline
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Security middleware
+app.use(helmet());
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cors(corsOptions));
-app.use(securityHeaders);
 app.use('/api/', apiLimiter);
 
-// Handle preflight requests
-app.options('*', cors(corsOptions));
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'healthy' });
-});
-
-// Log incoming requests
-app.use((req, res, next) => {
-  log(`Handling ${req.method} ${req.url}`, 'server');
+// Request logging
+app.use((req: Request, res: Response, next: NextFunction) => {
+  log(`${req.method} ${req.originalUrl}`, 'REQUEST');
   next();
 });
 
-// Expenses endpoints
-app.get('/api/expenses', async (req, res) => {
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API Endpoints
+app.get('/api/expenses', async (req, res, next) => {
   try {
-    const { year } = req.query;
+    const { year, month, category_id } = req.query;
     let query = 'SELECT * FROM expenses';
     const params = [];
+    const conditions = [];
 
     if (year) {
-      query += ' WHERE EXTRACT(YEAR FROM date::DATE) = $1';
+      conditions.push(`EXTRACT(YEAR FROM date) = $${conditions.length + 1}`);
       params.push(year);
     }
+    if (month) {
+      conditions.push(`EXTRACT(MONTH FROM date) = $${conditions.length + 1}`);
+      params.push(month);
+    }
+    if (category_id) {
+      conditions.push(`category_id = $${conditions.length + 1}`);
+      params.push(category_id);
+    }
 
-    query += ' ORDER BY date::DATE DESC';
+    if (conditions.length) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    query += ' ORDER BY date DESC';
     const result = await pool.query(query, params);
-    log(`Fetched expenses: ${JSON.stringify(result.rows)}`, 'database');
     res.json(result.rows);
   } catch (err) {
-    const error = err as Error;
-    log(`Error fetching expenses: ${error.message}`, 'database');
-    res.status(500).json({ error: 'Failed to fetch expenses' });
+    next(err);
   }
 });
 
-// Categories endpoint
-app.get('/api/categories', (req, res) => {
-  const categories = [
-    { id: 1, name: 'Food' },
-    { id: 2, name: 'Rent' },
-    // Add other categories
-  ];
-  log('Returning categories', 'server');
-  res.json(categories);
-});
+// Categories endpoints
+app.route('/api/categories')
+  .get(async (req, res, next) => {
+    try {
+      const result = await pool.query('SELECT * FROM categories ORDER BY name');
+      res.json(result.rows);
+    } catch (err) {
+      next(err);
+    }
+  })
+  .post(async (req, res, next) => {
+    try {
+      const { name, color, icon } = req.body;
+      const result = await pool.query(
+        'INSERT INTO categories (name, color, icon) VALUES ($1, $2, $3) RETURNING *',
+        [name, color, icon]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      next(err);
+    }
+  });
 
-// [Keep all your existing route handlers...]
-// (Include all your existing POST, PATCH, DELETE endpoints here)
-
-// Register additional routes
-registerRoutes(app);
-
-// Global error handler
+// Error handling
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   const error = err as Error;
-  log(`Unhandled error: ${error.message}`, 'error');
-  res.status(500).json({ error: 'Internal server error' });
+  log(`Error: ${error.message}\n${error.stack}`, 'ERROR', 'error');
+  res.status(500).json({
+    error: 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { details: error.message })
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    path: req.path,
+    method: req.method
+  });
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  log('SIGTERM received. Shutting down gracefully...');
-  pool.end()
-    .then(() => {
-      server.close(() => {
-        log('Server closed');
-        process.exit(0);
-      });
-    })
-    .catch((err: Error) => {
-      log(`Error during shutdown: ${err.message}`, 'error');
-      process.exit(1);
+function shutdown() {
+  log('Shutting down gracefully...', 'SERVER');
+  server.close(() => {
+    pool.end()
+      .then(() => log('Database pool closed', 'DATABASE'))
+      .finally(() => process.exit(0));
+  });
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+// Vite development server setup
+async function setupVite() {
+  if (process.env.NODE_ENV === 'production') return;
+
+  try {
+    const vite = await createViteServer({
+      ...viteConfig,
+      configFile: false,
+      server: { middlewareMode: true },
+      appType: 'custom'
     });
-});
+    app.use(vite.middlewares);
+    log('Vite development server attached', 'VITE');
+  } catch (err) {
+    log(`Vite setup failed: ${(err as Error).message}`, 'VITE', 'error');
+    process.exit(1);
+  }
+}
 
 // Start server
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-setupVite(app, server)
+setupVite()
   .then(() => {
-    serveStatic(app);
+    if (NODE_ENV === 'production') {
+      const distPath = path.resolve(__dirname, '../dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+      log(`Serving production build from ${distPath}`, 'SERVER');
+    }
+
     server.listen(PORT, () => {
-      log(`Server running at http://localhost:${PORT}`);
+      log(`Server running in ${NODE_ENV} mode on port ${PORT}`, 'SERVER');
     });
   })
-  .catch((err: Error) => {
-    log(`Failed to start server: ${err.message}`, 'error');
+  .catch(err => {
+    log(`Server startup failed: ${(err as Error).message}`, 'SERVER', 'error');
     process.exit(1);
   });

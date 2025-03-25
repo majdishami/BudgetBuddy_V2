@@ -9,10 +9,12 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
-  const env = loadEnv(mode, process.cwd());
+  const env = loadEnv(mode, process.cwd(), '');
 
-  // Debug: Log loaded environment variables
-  console.log('Loaded environment variables:', env);
+  // Validate required environment variables
+  if (!env.VITE_BACKEND_URL) {
+    throw new Error('VITE_BACKEND_URL environment variable is required');
+  }
 
   return {
     resolve: {
@@ -22,13 +24,23 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()],
     server: {
-      port: parseInt(env.VITE_PORT, 10) || 5174,
+      port: parseInt(env.VITE_PORT || '5174', 10),
+      strictPort: true,
       proxy: {
         '/api': {
           target: env.VITE_BACKEND_URL,
           changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
+    },
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+    },
+    preview: {
+      port: parseInt(env.VITE_PORT || '5174', 10),
     },
   };
 });
