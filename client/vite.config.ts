@@ -12,8 +12,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   // Debug: Log loaded environment variables
-  console.log(`Loaded VITE_BACKEND_URL: ${env.VITE_BACKEND_URL}`);
-  
+  console.log('Loaded environment variables:', env);
+
   return {
     resolve: {
       alias: {
