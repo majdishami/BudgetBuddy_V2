@@ -96,6 +96,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).send('Welcome to the API');
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
