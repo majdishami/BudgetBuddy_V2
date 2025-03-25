@@ -1,0 +1,1 @@
+npm install -D tailwindcss postcss autoprefixer npx tailwindcss init @layer base{.global-border{--tw-border-opacity: 1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.global-border{*{border-color:var(--tw-border-opacity, #d1d5db)}body{font-family:"sans-serif";-webkit-font-smoothing:antialiased;background-color:#fff;color:#000}}}

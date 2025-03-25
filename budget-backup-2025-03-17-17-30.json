@@ -1,0 +1,250 @@
+{
+  "expenses": [
+    {
+      "id": 1,
+      "name": "Rent",
+      "amount": "3750.00",
+      "date": "2025-01-01",
+      "frequency": "Monthly",
+      "categoryId": 1
+    },
+    {
+      "id": 2,
+      "name": "ATT Phone Bill ($115 Rund Roaming)",
+      "amount": "429.00",
+      "date": "2025-01-01",
+      "frequency": "Monthly",
+      "categoryId": 11
+    },
+    {
+      "id": 3,
+      "name": "Maid Service - Beginning of Month Payment",
+      "amount": "120.00",
+      "date": "2025-01-01",
+      "frequency": "Monthly",
+      "categoryId": 5
+    },
+    {
+      "id": 4,
+      "name": "Sling TV (CC 9550)",
+      "amount": "75.00",
+      "date": "2025-01-03",
+      "frequency": "Monthly",
+      "categoryId": 7
+    },
+    {
+      "id": 5,
+      "name": "Cox Internet",
+      "amount": "81.00",
+      "date": "2025-01-06",
+      "frequency": "Monthly",
+      "categoryId": 8
+    },
+    {
+      "id": 6,
+      "name": "Water Bill",
+      "amount": "80.00",
+      "date": "2025-01-07",
+      "frequency": "Monthly",
+      "categoryId": 13
+    },
+    {
+      "id": 7,
+      "name": "NV Energy Electrical ($100 winter months)",
+      "amount": "250.00",
+      "date": "2025-01-07",
+      "frequency": "Monthly",
+      "categoryId": 13
+    },
+    {
+      "id": 8,
+      "name": "TransAmerica Life Insurance",
+      "amount": "188.00",
+      "date": "2025-01-09",
+      "frequency": "Monthly",
+      "categoryId": 14
+    },
+    {
+      "id": 9,
+      "name": "Credit Card minimum payment",
+      "amount": "225.00",
+      "date": "2025-01-14",
+      "frequency": "Monthly",
+      "categoryId": 6
+    },
+    {
+      "id": 10,
+      "name": "Apple/Google/YouTube/etc 150+450 (CC 9550)",
+      "amount": "600.00",
+      "date": "2025-01-14",
+      "frequency": "Monthly",
+      "categoryId": 6
+    },
+    {
+      "id": 11,
+      "name": "Maid Service - Mid-Month Payment",
+      "amount": "120.00",
+      "date": "2025-01-17",
+      "frequency": "Monthly",
+      "categoryId": 5
+    },
+    {
+      "id": 12,
+      "name": "SoFi Personal Loan",
+      "amount": "1915.00",
+      "date": "2025-01-17",
+      "frequency": "Monthly",
+      "categoryId": 3
+    },
+    {
+      "id": 13,
+      "name": "Southwest Gas ($200 in winter/$45 in summer)",
+      "amount": "75.00",
+      "date": "2025-01-17",
+      "frequency": "Monthly",
+      "categoryId": 13
+    },
+    {
+      "id": 14,
+      "name": "Car Insurance- GEICO for 3 cars ($268 + $169 + $303 + $21)",
+      "amount": "704.00",
+      "date": "2025-01-28",
+      "frequency": "Monthly",
+      "categoryId": 4
+    },
+    {
+      "id": 15,
+      "name": "Expenses & Groceries charged on (CC 2647)",
+      "amount": "3000.00",
+      "date": "2025-01-28",
+      "frequency": "Monthly",
+      "categoryId": 2
+    },
+    {
+      "id": 16,
+      "name": "Cars annual registration",
+      "amount": "650.00",
+      "date": "2025-07-16",
+      "frequency": "Yearly",
+      "categoryId": 15
+    },
+    {
+      "id": 17,
+      "name": "Jewelry Insurance 1st payment",
+      "amount": "188.00",
+      "date": "2025-06-02",
+      "frequency": "Yearly",
+      "categoryId": 14
+    },
+    {
+      "id": 18,
+      "name": "Jewelry Insurance 2nd payment",
+      "amount": "188.00",
+      "date": "2025-12-02",
+      "frequency": "Yearly",
+      "categoryId": 14
+    }
+  ],
+  "incomes": [
+    {
+      "id": 13,
+      "name": "Majdi's Salary - 1st of Month",
+      "amount": "4785.00",
+      "date": "2025-01-01",
+      "frequency": "MONTHLY",
+      "source": "MAJDI"
+    },
+    {
+      "id": 6,
+      "name": "Ruba's Bi-weekly Salary",
+      "amount": "2168.00",
+      "date": "2025-01-10",
+      "frequency": "BIWEEKLY",
+      "source": "RUBA"
+    },
+    {
+      "id": 14,
+      "name": "Majdi's Salary - 15th of Month",
+      "amount": "4785.00",
+      "date": "2025-01-15",
+      "frequency": "MONTHLY",
+      "source": "MAJDI"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Rent",
+      "color": "#3B93F5",
+      "icon": "home"
+    },
+    {
+      "id": 2,
+      "name": "Groceries",
+      "color": "#4CAF50",
+      "icon": "shopping-cart"
+    },
+    {
+      "id": 3,
+      "name": "Loans",
+      "color": "#FF5722",
+      "icon": "credit-card"
+    },
+    {
+      "id": 4,
+      "name": "Car Insurance",
+      "color": "#9C27B0",
+      "icon": "car"
+    },
+    {
+      "id": 5,
+      "name": "House Cleaning",
+      "color": "#795548",
+      "icon": "trash"
+    },
+    {
+      "id": 6,
+      "name": "Credit Cards",
+      "color": "#F44336",
+      "icon": "credit-card"
+    },
+    {
+      "id": 7,
+      "name": "Entertainment",
+      "color": "#2196F3",
+      "icon": "tv"
+    },
+    {
+      "id": 8,
+      "name": "Internet",
+      "color": "#00BCD4",
+      "icon": "wifi"
+    },
+    {
+      "id": 11,
+      "name": "Phone",
+      "color": "#E91E63",
+      "icon": "phone"
+    },
+    {
+      "id": 13,
+      "name": "Utilities",
+      "color": "#FFC107",
+      "icon": "zap"
+    },
+    {
+      "id": 14,
+      "name": "Insurance",
+      "color": "#673AB7",
+      "icon": "shield"
+    },
+    {
+      "id": 15,
+      "name": "Other",
+      "color": "#607D8B",
+      "icon": "more-horizontal"
+    }
+  ],
+  "timestamp": "2025-03-18T00:30:08.672Z",
+  "version": "1.0"
+}
