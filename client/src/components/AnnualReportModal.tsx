@@ -4,7 +4,7 @@ import { formatCurrency, getRecurringDates } from "../lib/utils";
 import { isWithinInterval, startOfYear, endOfYear, format, isBefore, parseISO, isValid } from "date-fns";
 import { Button } from "./ui/button";
 import { Download } from "lucide-react";
-import type { Expense, Income } from "@shared/schema";
+import type { Expense, Income } from "../../../shared/schema";
 import { Separator } from "./ui/separator";
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";

@@ -1,73 +1,95 @@
-import { pgTable, text, serial, decimal, date, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import { pgTable, serial, varchar, decimal, date } from 'drizzle-orm/pg-core';
+import { z } from 'zod';
 
-// Expense frequency type
-export const FrequencyType = z.enum(['MONTHLY', 'YEARLY', 'ONCE']);
+// ======================
+// Frequency Types
+// ======================
+export const FrequencyType = z.enum([
+  'DAILY',
+  'WEEKLY',
+  'BIWEEKLY',
+  'MONTHLY',
+  'QUARTERLY',
+  'YEARLY',
+  'ONE_TIME'
+]);
 export type Frequency = z.infer<typeof FrequencyType>;
 
-// Income frequency type
-export const IncomeFrequencyType = z.enum(['BIWEEKLY', 'TWICE_MONTHLY', 'MONTHLY', 'ONCE']);
-export type IncomeFrequency = z.infer<typeof IncomeFrequencyType>;
-
-// Categories table
+// ======================
+// Database Tables
+// ======================
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   color: varchar("color", { length: 7 }).notNull(),
-  icon: varchar("icon", { length: 50 }).notNull()
+  icon: varchar("icon", { length: 50 }).notNull(),
+  createdAt: date("created_at").defaultNow(),
+  updatedAt: date("updated_at").defaultNow()
 });
 
-// Expenses table
 export const expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   date: date("date").notNull(),
   frequency: varchar("frequency", { length: 20 }).notNull(),
-  categoryId: serial("category_id").references(() => categories.id).notNull()
+  categoryId: serial("category_id").references(() => categories.id).notNull(),
+  createdAt: date("created_at").defaultNow(),
+  updatedAt: date("updated_at").defaultNow()
 });
 
-// Incomes table
 export const incomes = pgTable("incomes", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   date: date("date").notNull(),
   frequency: varchar("frequency", { length: 20 }).notNull(),
-  source: varchar("source", { length: 50 }).notNull()
+  source: varchar("source", { length: 50 }),
+  createdAt: date("created_at").defaultNow(),
+  updatedAt: date("updated_at").defaultNow()
 });
 
-// Schema types
+// ======================
+// Base Types
+// ======================
 export type Category = typeof categories.$inferSelect;
 export type Expense = typeof expenses.$inferSelect;
 export type Income = typeof incomes.$inferSelect;
 
-// Custom insert schemas with proper type handling
-export const insertCategorySchema = createInsertSchema(categories);
+// ======================
+// Frontend Types (with string dates)
+// ======================
+export interface FrontendCategory extends Omit<Category, 'createdAt'|'updatedAt'> {
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Custom expense insert schema with proper type handling
-export const insertExpenseSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  amount: z.string().or(z.number()).transform(val => String(val)),
-  date: z.string().or(z.date()).transform(val => 
-    typeof val === 'string' ? val : val.toISOString().split('T')[0]
-  ),
-  frequency: FrequencyType,
-  categoryId: z.string().or(z.number()).transform(val => Number(val))
-});
+export interface FrontendExpense extends Omit<Expense, 'date'|'createdAt'|'updatedAt'> {
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+  category?: FrontendCategory;
+}
 
-// Add specific income schema validation
-export const insertIncomeSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  amount: z.string().or(z.number()).transform(val => String(val)),
-  date: z.string().or(z.date()).transform(val => 
-    typeof val === 'string' ? val : val.toISOString().split('T')[0]
-  ),
-  frequency: IncomeFrequencyType,
-  source: z.string()
-});
+export interface FrontendIncome extends Omit<Income, 'date'|'createdAt'|'updatedAt'> {
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export type InsertCategory = z.infer<typeof insertCategorySchema>;
-export type InsertExpense = z.infer<typeof insertExpenseSchema>;
-export type InsertIncome = z.infer<typeof insertIncomeSchema>;
+// ======================
+// Report Types
+// ======================
+export interface ProcessedExpense extends FrontendExpense {
+  dates: { date: string; isPending: boolean; amount: number }[];
+  incurredAmount: number;
+  pendingAmount: number;
+  totalAmount: number;
+}
+
+export interface ProcessedIncome extends FrontendIncome {
+  dates: { date: string; isPending: boolean; amount: number }[];
+  incurredAmount: number;
+  pendingAmount: number;
+  totalAmount: number;
+}
