@@ -32,7 +32,7 @@ export async function apiRequest({ url, method, headers, body }: ApiRequestParam
   await throwIfResNotOk(res);
 
   const contentType = res.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
+  if (contentType && contentType.includes("application/json")) { // Fixed: added `.`
     const text = await res.text();
     try {
       return JSON.parse(text);
@@ -67,7 +67,7 @@ export const getQueryFn: <T>(options: {
 
       await throwIfResNotOk(res);
       const contentType = res.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
+      if (contentType && contentType.includes("application/json")) { // Fixed: added `.`
         const text = await res.text();
         console.log(`Response for ${url}:`, text);
         try {

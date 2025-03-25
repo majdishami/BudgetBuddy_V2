@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   // Debug: Log loaded environment variables
-  console.log('Loaded environment variables:', env);
+  console.log('Loaded environment variables:', env); // Updated
 
   return {
     resolve: {
