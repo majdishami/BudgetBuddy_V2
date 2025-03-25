@@ -1,6 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+console.log(`Backend URL: ${BACKEND_URL}`); // Added debug statement
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
