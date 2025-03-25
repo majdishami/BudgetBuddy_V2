@@ -1,5 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.clone().text()) || res.statusText;
@@ -15,8 +17,8 @@ export type ApiRequestParams = {
 };
 
 export async function apiRequest({ url, method, headers, body }: ApiRequestParams): Promise<any> {
-  console.log(`Making API request to ${url} with method ${method}`);
-  const res = await fetch(`http://localhost:3000${url}`, {
+  console.log(`Making API request to ${BACKEND_URL}${url} with method ${method}`);
+  const res = await fetch(`${BACKEND_URL}${url}`, {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -50,7 +52,7 @@ export const getQueryFn: <T>(options: {
   ({ on401 }) =>
   async ({ queryKey }) => {
     const relativeUrl = queryKey[0] as string;
-    const url = `http://localhost:3000${relativeUrl}`;
+    const url = `${BACKEND_URL}${relativeUrl}`;
     console.log("Fetching:", url);
 
     try {
