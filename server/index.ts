@@ -12,36 +12,47 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import type { CorsOptions } from 'cors';
 
-// First initialize __dirname properly for ES modules
+// Initialize environment variables with proper path
+const envPath = path.resolve(process.cwd(), '.env');
+dotenv.config({ path: fs.existsSync(envPath) ? envPath : undefined });
+
+// ES modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Now we can use __dirname safely
-const envPath = path.resolve(__dirname, '../.env');
-dotenv.config({ path: fs.existsSync(envPath) ? envPath : '.env' });
-
-const { Pool } = pg;
-
-// Enhanced logging
-export function log(message: string, source = "SERVER", level: 'info' | 'warn' | 'error' = 'info') {
+// Enhanced logging function
+function log(message: string, source = "SERVER", level: 'info' | 'warn' | 'error' = 'info') {
   const timestamp = new Date().toISOString();
-  const levelPrefix = level === 'error' ? '❌' : level === 'warn' ? '⚠️' : 'ℹ️';
-  console.log(`${levelPrefix} [${timestamp}] [${source}] ${message}`);
+  const levelMap = {
+    info: '\x1b[36m', // cyan
+    warn: '\x1b[33m', // yellow
+    error: '\x1b[31m' // red
+  };
+  console.log(`${levelMap[level]}[${timestamp}] [${source}] ${message}\x1b[0m`);
 }
 
-// Validate required environment variables
-const requiredEnvVars = ['DB_USER', 'DB_HOST', 'DB_NAME', 'VITE_BACKEND_URL'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-if (missingVars.length > 0) {
-  log(`Missing required environment variables: ${missingVars.join(', ')}`, 'CONFIG', 'error');
-  process.exit(1);
-}
+// Database configuration using either URL or individual parameters
+const databaseConfig = process.env.DATABASE_URL 
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    }
+  : {
+      user: 'postgres',
+      host: 'localhost',
+      database: 'financial_management',
+      password: process.env.DB_PASSWORD || 'your_postgres_password',
+      port: 5432,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000
+    };
 
 // CORS configuration
 const corsOptions: CorsOptions = {
   origin: process.env.NODE_ENV === 'production'
-    ? [process.env.PRODUCTION_URL!]
-    : ['http://localhost:5173', 'http://localhost:5174'],
+    ? [process.env.PRODUCTION_URL || '']
+    : [`http://localhost:${process.env.VITE_PORT || 5174}`],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -50,7 +61,7 @@ const corsOptions: CorsOptions = {
 
 // Rate limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -61,17 +72,8 @@ const apiLimiter = rateLimit({
 const app: Express = express();
 const server = createServer(app);
 
-// Database configuration
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD || '',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-});
+// Database connection pool
+const pool = new pg.Pool(databaseConfig);
 
 // Test database connection
 pool.query('SELECT NOW()')
@@ -99,7 +101,8 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    database: 'connected'
   });
 });
 
@@ -159,7 +162,7 @@ app.route('/api/categories')
     }
   });
 
-// Error handling
+// Error handling middleware
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   const error = err as Error;
   log(`Error: ${error.message}\n${error.stack}`, 'ERROR', 'error');
@@ -225,6 +228,8 @@ setupVite()
 
     server.listen(PORT, () => {
       log(`Server running in ${NODE_ENV} mode on port ${PORT}`, 'SERVER');
+      log(`Backend URL: ${process.env.VITE_BACKEND_URL}`, 'CONFIG');
+      log(`Frontend Port: ${process.env.VITE_PORT}`, 'CONFIG');
     });
   })
   .catch(err => {
