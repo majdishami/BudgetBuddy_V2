@@ -83,8 +83,18 @@ pool.query('SELECT NOW()')
     process.exit(1);
   });
 
-// Security middleware
-app.use(helmet());
+// Security middleware with relaxed CSP settings
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'", "http://localhost:3001"],
+    }
+  }
+}));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cors(corsOptions));
