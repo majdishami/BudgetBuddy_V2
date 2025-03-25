@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,19 +7,24 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001', // your Express server
-        changeOrigin: true,
+export default defineConfig(({ mode }) => {
+  // Load environment variables based on the current mode
+  const env = loadEnv(mode, process.cwd());
+
+  return {
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
       },
     },
-  },
+    plugins: [react()],
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+        },
+      },
+    },
+  };
 });
