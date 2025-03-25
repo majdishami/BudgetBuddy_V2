@@ -4,12 +4,41 @@ import { formatCurrency, getRecurringDates } from "../lib/utils";
 import { isWithinInterval, format, parseISO, startOfMonth, endOfMonth, isSameMonth, isBefore, isValid } from "date-fns";
 import { Button } from "./ui/button";
 import { Download } from "lucide-react";
-import type { Expense, Income, Category } from "@shared/schema";
 import { Separator } from "./ui/separator";
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
 
-// Helper function to validate and parse dates
+// Define types locally since @shared/schema is not available
+type Category = {
+  id: number;
+  name: string;
+  color: string;
+  icon: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+type Expense = {
+  id: number;
+  name: string;
+  amount: string;
+  date: string;
+  frequency: string;
+  categoryId: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+type Income = {
+  id: number;
+  name: string;
+  amount: string;
+  date: string;
+  frequency: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
 // Helper function to validate and parse dates
 function ensureValidDate(date: Date | string | undefined): Date {
   try {
@@ -49,14 +78,16 @@ interface CategoryGroup {
   pendingAmount: number;
 }
 
-interface ProcessedExpense extends Expense {
+interface ProcessedExpense extends Omit<Expense, 'amount'> {
+  amount: number;
   dates: { date: Date; isPending: boolean; amount: number }[];
   incurredAmount: number;
   pendingAmount: number;
   totalAmount: number;
 }
 
-interface ProcessedIncome extends Income {
+interface ProcessedIncome extends Omit<Income, 'amount'> {
+  amount: number;
   dates: { date: Date; isPending: boolean; amount: number }[];
   incurredAmount: number;
   pendingAmount: number;
@@ -170,6 +201,7 @@ export default function ReportModal({
 
       return {
         ...income,
+        amount: Number(income.amount),
         dates,
         incurredAmount,
         pendingAmount,
@@ -179,6 +211,7 @@ export default function ReportModal({
       console.error("Error processing recurring income dates:", error);
       return {
         ...income,
+        amount: Number(income.amount),
         dates: [],
         incurredAmount: 0,
         pendingAmount: 0,
@@ -214,6 +247,7 @@ export default function ReportModal({
 
         return {
           ...expense,
+          amount: Number(expense.amount),
           dates,
           incurredAmount,
           pendingAmount,
@@ -223,6 +257,7 @@ export default function ReportModal({
         console.error("Error processing recurring expense dates:", error);
         return {
           ...expense,
+          amount: Number(expense.amount),
           dates: [],
           incurredAmount: 0,
           pendingAmount: 0,
@@ -283,10 +318,10 @@ export default function ReportModal({
         return "Category-wise Report";
       case "single-expense": {
         const expense = expenses.find(e => e.id.toString() === selectedExpenseId);
-        return `Single Expense Report - ${expense?.name}`;
+        return `Single Expense Report - ${expense?.name || 'Unknown'}`;
       }
       case "single-category": {
-        return `Category Report - ${selectedCategoryDetails?.name}`;
+        return `Category Report - ${selectedCategoryDetails?.name || 'Unknown'}`;
       }
       default:
         return "Budget Report";
@@ -557,7 +592,7 @@ export default function ReportModal({
     // Save the PDF
     const fileName = isMonthlyBudget ? 'monthly-budget' :
       filterType === "all-categories" ? 'category-report' :
-        filterType === "single-category" ? `category-${selectedCategoryDetails?.name.toLowerCase()}-report` :
+        filterType === "single-category" ? `category-${selectedCategoryDetails?.name.toLowerCase() || 'unknown'}-report` :
           filterType === "all-incomes" ? 'income-report' : 'expense-report';
 
     doc.save(`${fileName}-${format(startDate, 'yyyy-MM-dd')}.pdf`);
@@ -702,7 +737,7 @@ export default function ReportModal({
     const wb = XLSX.utils.book_new();
     const fileName = isMonthlyBudget ? 'Monthly Budget' :
       filterType === "all-categories" ? 'Category Report' :
-        filterType === "single-category" ? `Category - ${selectedCategoryDetails?.name}` :
+        filterType === "single-category" ? `Category - ${selectedCategoryDetails?.name || 'Unknown'}` :
           filterType === "all-incomes" ? 'Income Report' : 'Expense Report';
 
     XLSX.utils.book_append_sheet(wb, ws, fileName);
