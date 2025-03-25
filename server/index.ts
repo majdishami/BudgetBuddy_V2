@@ -141,6 +141,12 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
 });
 
+// Log incoming requests
+app.use((req, res, next) => {
+  log(`Handling ${req.method} ${req.url}`, 'server');
+  next();
+});
+
 // Expenses endpoints
 app.get('/api/expenses', async (req, res) => {
   try {
@@ -155,12 +161,24 @@ app.get('/api/expenses', async (req, res) => {
 
     query += ' ORDER BY date::DATE DESC';
     const result = await pool.query(query, params);
+    log(`Fetched expenses: ${JSON.stringify(result.rows)}`, 'database');
     res.json(result.rows);
   } catch (err) {
     const error = err as Error;
     log(`Error fetching expenses: ${error.message}`, 'database');
     res.status(500).json({ error: 'Failed to fetch expenses' });
   }
+});
+
+// Categories endpoint
+app.get('/api/categories', (req, res) => {
+  const categories = [
+    { id: 1, name: 'Food' },
+    { id: 2, name: 'Rent' },
+    // Add other categories
+  ];
+  log('Returning categories', 'server');
+  res.json(categories);
 });
 
 // [Keep all your existing route handlers...]

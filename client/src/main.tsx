@@ -1,14 +1,14 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css'; // Import the CSS file
+import ReactDOM from 'react-dom';
 import App from './App';
+import './index.css';
 
-// Create a root container
-const container = document.getElementById('root');
-const root = createRoot(container!); // Use createRoot with the container
+// Debug: Log environment variables
+console.log('Environment Variables:', import.meta.env);
 
-root.render(
+ReactDOM.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
