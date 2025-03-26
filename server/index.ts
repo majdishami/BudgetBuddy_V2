@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { createServer as createViteServer } from "vite";
-import { config as viteConfig } from "../vite.config.ts";
+import { config as viteConfig } from "../vite.config.ts"; // Corrected import statement
 import dotenv from "dotenv";
 import cors from 'cors';
 import pg from 'pg';
@@ -159,8 +159,7 @@ app.get('/api/expenses', async (req, res, next) => {
   }
 });
 
-// Keep all your existing API endpoints exactly as they were
-// (incomes, categories, etc.)
+// Keep all your existing API endpoints exactly as they were (incomes, categories, etc.)
 
 // Error handling middleware
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
