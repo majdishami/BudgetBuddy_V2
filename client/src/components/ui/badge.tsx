@@ -1,5 +1,5 @@
-"use client";
-
+// Remove the "use client" directive since it's causing issues with Vite
+// Keep all other imports and code the same
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
