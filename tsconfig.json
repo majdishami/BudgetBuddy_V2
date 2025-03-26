@@ -11,10 +11,10 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["node_modules/*", "src/types/*"] // Ensure this includes necessary paths
+      "*": ["node_modules/*", "src/types/*"]
     },
     "types": ["node"]
   },
-  "include": ["src/**/*", "server/**/*", "vite.config.ts"], // Ensure this includes vite.config.ts
+  "include": ["src/**/*", "server/**/*", "vite.config.ts", "vite.config.d.ts"],
   "exclude": ["node_modules"]
 }
