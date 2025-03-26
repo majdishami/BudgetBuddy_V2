@@ -214,7 +214,7 @@ async function setupVite() {
 }
 
 // Start server
-const PORT = parseInt(process.env.PORT || '3001', 10);
+const PORT = 3001; // Ensure this is set to 3001
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 setupVite()
