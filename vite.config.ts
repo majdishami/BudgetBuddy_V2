@@ -28,13 +28,17 @@ export default defineConfig(({ mode }: { mode: string }) => {
         '@': path.resolve(__dirname, './src'),
         '@components': path.resolve(__dirname, './src/components'),
         '@pages': path.resolve(__dirname, './src/pages'),
-        '@lib': path.resolve(__dirname, './src/lib')
+        '@lib': path.resolve(__dirname, './src/lib'),
+        '@shared': path.resolve(__dirname, '../shared') // Added from client config
       }
     },
     build: {
       outDir: 'dist/client',
       emptyOutDir: true,
       sourcemap: mode === 'development'
+    },
+    optimizeDeps: {
+      include: ['@shared/schema'] // Added from client config
     }
   };
 });
