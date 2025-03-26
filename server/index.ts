@@ -1,4 +1,4 @@
-import express, { type Express, Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -60,7 +60,7 @@ const apiLimiter = rateLimit({
 });
 
 // Initialize Express app
-const app: Express = express();
+const app = express();
 const server = createServer(app);
 
 // Database connection pool
