@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { createServer as createViteServer } from "vite";
-import { config as viteConfig } from "../vite.config.ts"; // Corrected import statement
+import viteConfig from "../vite.config.ts"; // Corrected import statement
 import dotenv from "dotenv";
 import cors from 'cors';
 import pg from 'pg';
