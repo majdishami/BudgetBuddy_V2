@@ -10,14 +10,22 @@ export default defineConfig(({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    root: path.resolve(__dirname, 'client'), // Ensure this points to the client directory containing index.html
-    plugins: [react()],
+    root: path.resolve(__dirname, 'client'),
+    plugins: [
+      react({
+        babel: {
+          plugins: [
+            ['module:@preact/signals-react-transform'],
+          ],
+        },
+      }),
+    ],
     server: {
-      port: parseInt(env.VITE_PORT) || 5174, // Ensure this is set to 5174 and parsed as a number
+      port: parseInt(env.VITE_PORT) || 5174,
       strictPort: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:3001', // Ensure this points to http://localhost:3001
+          target: 'http://localhost:3001',
           changeOrigin: true,
           secure: false,
           rewrite: (path: string) => path.replace(/^\/api/, ''),
@@ -30,7 +38,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
         '@components': path.resolve(__dirname, 'client/src/components'),
         '@pages': path.resolve(__dirname, 'client/src/pages'),
         '@lib': path.resolve(__dirname, 'client/src/lib'),
-        '@shared': path.resolve(__dirname, '../shared') // Added from client config
+        '@shared': path.resolve(__dirname, '../shared')
       }
     },
     build: {
@@ -38,11 +46,19 @@ export default defineConfig(({ mode }: { mode: string }) => {
       emptyOutDir: true,
       sourcemap: mode === 'development',
       rollupOptions: {
-        external: ['drizzle-orm'] // Add this line to externalize drizzle-orm module
+        external: ['drizzle-orm'],
+        onwarn(warning, warn) {
+          // Ignore "use client" directive warnings
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes('"use client"')) {
+            return;
+          }
+          warn(warning);
+        }
       }
     },
     optimizeDeps: {
-      include: ['@shared/schema'] // Added from client config
+      include: ['@shared/schema'],
+      exclude: ['@tanstack/react-query', '@radix-ui/react-*']
     }
   };
 });
