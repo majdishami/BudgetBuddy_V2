@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv, PluginOption } from 'vite';
+import { defineConfig, loadEnv } from 'vite'; // Remove PluginOption
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -11,7 +11,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
 
   return {
     root: path.resolve(__dirname, 'client'), // Ensure this points to the client directory containing index.html
-    plugins: [react()] as PluginOption[],
+    plugins: [react()],
     server: {
       port: 5174, // Ensure this is set to 5174
       strictPort: true,
