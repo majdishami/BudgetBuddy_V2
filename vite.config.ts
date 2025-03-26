@@ -13,14 +13,14 @@ export default defineConfig(({ mode }: { mode: string }) => {
     root: path.resolve(__dirname, 'client'), // Ensure this points to the client directory containing index.html
     plugins: [react()],
     server: {
-      port: 5174, // Ensure this is set to 5174
+      port: parseInt(env.VITE_PORT) || 5174, // Ensure this is set to 5174 and parsed as a number
       strictPort: true,
       proxy: {
         '/api': {
           target: 'http://localhost:3001', // Ensure this points to http://localhost:3001
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          rewrite: (path: string) => path.replace(/^\/api/, ''),
         }
       }
     },
