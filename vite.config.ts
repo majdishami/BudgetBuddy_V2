@@ -6,11 +6,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig(({ mode }: { mode: string }) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    root: path.resolve(__dirname, 'client'),
+    root: __dirname,
     plugins: [
       react({
         babel: {
@@ -25,31 +25,31 @@ export default defineConfig(({ mode }: { mode: string }) => {
       strictPort: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:3001',
+          target: env.VITE_BACKEND_URL || 'http://localhost:3001',
           changeOrigin: true,
           secure: false,
-          rewrite: (path: string) => path.replace(/^\/api/, ''),
+          rewrite: (path) => path.replace(/^\/api/, ''),
         }
       }
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'client/src'),
-        '@lib/utils': path.resolve(__dirname, 'client/src/lib/utils.ts')
+        '@': path.resolve(__dirname, 'src'),
+        '@lib': path.resolve(__dirname, 'src/lib'),
+        '@components': path.resolve(__dirname, 'src/components'),
+        '@pages': path.resolve(__dirname, 'src/pages'),
+        '@hooks': path.resolve(__dirname, 'src/hooks'),
+        '@shared': path.resolve(__dirname, '../shared')
       }
     },
     build: {
-      outDir: 'dist/client',
+      outDir: '../dist',
       emptyOutDir: true,
       sourcemap: mode === 'development',
       rollupOptions: {
         external: ['drizzle-orm'],
         onwarn(warning, warn) {
-          if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && 
-             (warning.message.includes('"use client"') || 
-              warning.message.includes('"use server"'))) {
-            return;
-          }
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
           warn(warning);
         }
       }
