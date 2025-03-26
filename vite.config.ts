@@ -10,6 +10,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    root: path.resolve(__dirname, 'client'), // Ensure this points to the client directory containing index.html
     plugins: [react()] as PluginOption[],
     server: {
       port: 5174, // Ensure this is set to 5174
