@@ -120,6 +120,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Root path endpoint
+app.get('/', (req, res) => {
+  res.status(200).send('Welcome to BudgetBuddy API');
+});
+
 // API Endpoints (keep your existing endpoints exactly as they were)
 app.get('/api/expenses', async (req, res, next) => {
   try {
