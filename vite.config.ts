@@ -33,16 +33,10 @@ export default defineConfig(({ mode }: { mode: string }) => {
       }
     },
     resolve: {
-      alias: [
-        {
-          find: '@/',
-          replacement: path.resolve(__dirname, 'client/src/')
-        },
-        {
-          find: '@/lib/utils',
-          replacement: path.resolve(__dirname, 'client/src/lib/utils.ts')
-        }
-      ]
+      alias: {
+        '@': path.resolve(__dirname, 'client/src'),
+        '@lib/utils': path.resolve(__dirname, 'client/src/lib/utils.ts')
+      }
     },
     build: {
       outDir: 'dist/client',
@@ -51,10 +45,9 @@ export default defineConfig(({ mode }: { mode: string }) => {
       rollupOptions: {
         external: ['drizzle-orm'],
         onwarn(warning, warn) {
-          // Suppress "use client" directive warnings
           if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && 
-              (warning.message.includes('"use client"') || 
-               warning.message.includes('"use server"'))) {
+             (warning.message.includes('"use client"') || 
+              warning.message.includes('"use server"'))) {
             return;
           }
           warn(warning);
