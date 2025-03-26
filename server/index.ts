@@ -2,7 +2,7 @@ import express, { type Express, Request, Response, NextFunction } from "express"
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createServer, Server } from "http";
+import { createServer } from "http";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../vite.config";
 import dotenv from "dotenv";
