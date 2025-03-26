@@ -8,11 +8,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"],
-      "@lib/*": ["src/lib/*"],
-      "@components/*": ["src/components/*"]
+      "@/*": ["./*"],
+      "@components/*": ["components/*"],
+      "@lib/*": ["lib/*"],
+      "@pages/*": ["pages/*"],
+      "@shared/*": ["../shared/*"]
     },
     "types": ["vite/client"]
   },

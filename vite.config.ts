@@ -10,7 +10,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    root: path.resolve(__dirname, 'client'),
+    root: __dirname,
     plugins: [
       react({
         babel: {
@@ -33,22 +33,21 @@ export default defineConfig(({ mode }: { mode: string }) => {
       }
     },
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'client/src'),
-        '@components': path.resolve(__dirname, 'client/src/components'),
-        '@pages': path.resolve(__dirname, 'client/src/pages'),
-        '@lib': path.resolve(__dirname, 'client/src/lib'),
-        '@shared': path.resolve(__dirname, '../shared')
-      }
+      alias: [
+        { find: '@', replacement: path.resolve(__dirname, 'src') },
+        { find: '@components', replacement: path.resolve(__dirname, 'src/components') },
+        { find: '@pages', replacement: path.resolve(__dirname, 'src/pages') },
+        { find: '@lib', replacement: path.resolve(__dirname, 'src/lib') },
+        { find: '@shared', replacement: path.resolve(__dirname, '../shared') }
+      ]
     },
     build: {
-      outDir: 'dist/client',
+      outDir: 'dist',
       emptyOutDir: true,
       sourcemap: mode === 'development',
       rollupOptions: {
         external: ['drizzle-orm'],
         onwarn(warning, warn) {
-          // Ignore "use client" directive warnings
           if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes('"use client"')) {
             return;
           }
