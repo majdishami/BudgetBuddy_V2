@@ -26,10 +26,10 @@ export default defineConfig(({ mode }: { mode: string }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
-        '@components': path.resolve(__dirname, './src/components'),
-        '@pages': path.resolve(__dirname, './src/pages'),
-        '@lib': path.resolve(__dirname, './src/lib'),
+        '@': path.resolve(__dirname, 'client/src'),
+        '@components': path.resolve(__dirname, 'client/src/components'),
+        '@pages': path.resolve(__dirname, 'client/src/pages'),
+        '@lib': path.resolve(__dirname, 'client/src/lib'),
         '@shared': path.resolve(__dirname, '../shared') // Added from client config
       }
     },
