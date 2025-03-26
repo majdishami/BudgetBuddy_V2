@@ -14,7 +14,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5174 // Updated to 5174
+    port: 5174 // Ensure this is set to 5174
   },
   build: {
     outDir: 'dist'

@@ -12,7 +12,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
   return {
     plugins: [react()] as PluginOption[],
     server: {
-      port: 5174, // Updated to 5174
+      port: 5174, // Ensure this is set to 5174
       strictPort: true,
       proxy: {
         '/api': {

@@ -41,7 +41,7 @@ const databaseConfig = {
 const corsOptions: CorsOptions = {
   origin: [
     `http://localhost:${process.env.VITE_PORT || 5174}`,
-    process.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    'http://localhost:3001' // Ensure this points to http://localhost:3001
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -84,8 +84,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:"],
       connectSrc: [
         "'self'",
-        `http://localhost:${process.env.PORT || 3001}`,
-        process.env.VITE_BACKEND_URL || 'http://localhost:3001'
+        'http://localhost:3001' // Ensure this points to http://localhost:3001
       ]
     }
   }
