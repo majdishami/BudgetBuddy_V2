@@ -1,10 +1,11 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
+import type { Request, Response, NextFunction } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { createServer as createViteServer } from "vite";
-import viteConfig from "../vite.config.ts"; // Ensure the path is correct
+import viteConfig from "../vite.config.ts";
 import dotenv from "dotenv";
 import cors from 'cors';
 import pg from 'pg';
