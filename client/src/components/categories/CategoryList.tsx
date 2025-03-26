@@ -16,7 +16,7 @@ interface CategoryListProps {
 export default function CategoryList({ open, onClose, onEdit, onDelete }: CategoryListProps) {
   const { data: categories, isLoading, error } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
-    queryFn: fetchCategories, // Use the fetchCategories function here
+    queryFn: fetchCategories as unknown as () => Promise<Category[]>, // Ensure proper type
   });
 
   // Use useEffect to handle side effects like logging
@@ -79,7 +79,7 @@ export default function CategoryList({ open, onClose, onEdit, onDelete }: Catego
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories?.map((category) => {
+              {categories?.map((category: Category) => {
                 if (!category.name) return null; // Skip rendering if name is undefined
 
                 return (

@@ -150,8 +150,8 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Type definitions
-interface Expense {
+// Type definitions - now exported
+export interface Expense {
   id: number;
   amount: number;
   date: string;
@@ -160,7 +160,7 @@ interface Expense {
   user_id: number;
 }
 
-interface Income {
+export interface Income {
   id: number;
   amount: number;
   date: string;
@@ -168,7 +168,7 @@ interface Income {
   user_id: number;
 }
 
-interface Category {
+export interface Category {
   id: number;
   name: string;
   color?: string;

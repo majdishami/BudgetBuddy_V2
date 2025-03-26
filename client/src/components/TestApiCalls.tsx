@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { fetchExpenses, fetchIncomes, fetchCategories } from "../lib/queryClient"; // Use relative path
+import { fetchExpenses, fetchIncomes, fetchCategories } from "../lib/queryClient";
+import type { Expense, Income, Category } from "../lib/queryClient"; // Import the types
 
 const TestApiCalls: React.FC = () => {
-  const [expenses, setExpenses] = useState(null);
-  const [incomes, setIncomes] = useState(null);
-  const [categories, setCategories] = useState(null);
+  const [expenses, setExpenses] = useState<Expense[] | null>(null);
+  const [incomes, setIncomes] = useState<Income[] | null>(null);
+  const [categories, setCategories] = useState<Category[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

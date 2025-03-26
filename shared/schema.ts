@@ -93,3 +93,28 @@ export interface ProcessedIncome extends FrontendIncome {
   pendingAmount: number;
   totalAmount: number;
 }
+
+// ======================
+// Validation Schemas
+// ======================
+export const insertCategorySchema = z.object({
+  name: z.string(),
+  color: z.string(),
+  icon: z.string()
+});
+
+export const insertExpenseSchema = z.object({
+  name: z.string(),
+  amount: z.string(),
+  date: z.date(),
+  frequency: z.string(),
+  categoryId: z.number()
+});
+
+export const insertIncomeSchema = z.object({
+  name: z.string(),
+  amount: z.string(),
+  date: z.date(),
+  frequency: z.string(),
+  source: z.string().optional()
+});
