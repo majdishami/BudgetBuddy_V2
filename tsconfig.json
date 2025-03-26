@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "strict": true,
+    "jsx": "preserve",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -11,26 +12,10 @@
     "paths": {
       "@/*": ["src/*"],
       "@lib/*": ["src/lib/*"],
-      "@components/*": ["src/components/*"],
-      "@pages/*": ["src/pages/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@shared/*": ["../shared/*"]
+      "@components/*": ["src/components/*"]
     },
-    "types": ["vite/client"],
-    "jsx": "preserve",
-    "outDir": "./dist",
-    "rootDir": ".",
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true
+    "types": ["vite/client"]
   },
-  "include": [
-    "src/**/*",
-    "vite.config.ts",
-    "../shared/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*", "vite.config.ts"],
+  "exclude": ["node_modules"]
 }
