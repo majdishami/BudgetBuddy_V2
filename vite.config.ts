@@ -36,7 +36,10 @@ export default defineConfig(({ mode }: { mode: string }) => {
     build: {
       outDir: 'dist/client',
       emptyOutDir: true,
-      sourcemap: mode === 'development'
+      sourcemap: mode === 'development',
+      rollupOptions: {
+        external: ['drizzle-orm'] // Add this line to externalize drizzle-orm module
+      }
     },
     optimizeDeps: {
       include: ['@shared/schema'] // Added from client config
