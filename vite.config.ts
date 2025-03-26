@@ -12,11 +12,11 @@ export default defineConfig(({ mode }: { mode: string }) => {
   return {
     plugins: [react()] as PluginOption[],
     server: {
-      port: parseInt(env.VITE_PORT, 10),
+      port: 5174, // Updated to 5174
       strictPort: true,
       proxy: {
         '/api': {
-          target: env.VITE_BACKEND_URL,
+          target: 'http://localhost:3001', // Ensure this points to http://localhost:3001
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api/, ''),
