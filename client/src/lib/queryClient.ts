@@ -1,5 +1,4 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
-
+import { QueryClient, QueryFunction, QueryKey } from "@tanstack/react-query";
 // Validate and type environment variables
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 if (!BACKEND_URL) {
@@ -33,12 +32,12 @@ export type ApiRequestParams<T = unknown> = {
 };
 
 // Core API request function with enhanced typing
-export async function apiRequest<T = unknown, U = unknown>({
-  url,
-  method,
-  headers,
-  body,
-  signal
+export async function apiRequest<T = unknown, U = unknown>({ 
+  url, 
+  method, 
+  headers, 
+  body, 
+  signal 
 }: ApiRequestParams<U>): Promise<T> {
   const fullUrl = `${BACKEND_URL}${url}`;
   console.debug(`API Request: ${method} ${fullUrl}`);
@@ -70,8 +69,8 @@ export async function apiRequest<T = unknown, U = unknown>({
 }
 
 // Typed query function factory
-export function getQueryFn<T>(options: {
-  on401?: "returnNull" | "throw";
+export function getQueryFn<T>(options: { 
+  on401?: "returnNull" | "throw"; 
 } = { on401: "throw" }): QueryFunction<T> {
   return async ({ queryKey, signal }) => {
     const relativeUrl = queryKey[0] as string;
@@ -133,9 +132,8 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      retry: (failureCount, error) => {
-        const err = error as Error;
-        if (err.message.includes('401') || err.message.includes('403')) {
+      retry: (failureCount: number, error: Error) => {
+        if (error.message.includes('401') || error.message.includes('403')) {
           return false;
         }
         return failureCount < 3;
@@ -150,7 +148,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Type definitions - now exported
+// Type definitions
 export interface Expense {
   id: number;
   amount: number;

@@ -1,27 +1,26 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
     "target": "ESNext",
+    "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["../shared/*"]
+    },
+    "types": ["vite/client", "node"],
     "strict": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "jsx": "preserve",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "types": ["node", "vite/client"],
-    "paths": {
-      "@/*": ["./client/src/*"],
-      "@hooks/*": ["./client/src/hooks/*"],
-      "@components/*": ["./client/src/components/*"],
-      "@lib/*": ["./client/src/lib/*"],
-      "@shared/*": ["./shared/*"]
-    }
-  }
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src",
+    "../shared",
+    "global.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -47,7 +47,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
       sourcemap: mode === 'development',
       rollupOptions: {
         external: ['drizzle-orm'],
-        onwarn(warning, warn) {
+        onwarn(warning: any, warn: (warning: any) => void) {
           // Ignore "use client" directive warnings
           if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes('"use client"')) {
             return;
