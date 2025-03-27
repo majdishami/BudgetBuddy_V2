@@ -24,6 +24,7 @@
     "drizzle-orm": "^0.41.0",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
+    "jspdf": "^3.0.1",
     "pg": "^8.14.1",
     "xlsx": "^0.18.5",
     "zod-validation-error": "^3.4.0"
@@ -32,7 +33,7 @@
     "@types/cors": "^2.8.17",
     "@types/helmet": "^0.0.48",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.13",
+    "@types/node": "^22.13.14",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^8.2.2",
     "husky": "^8.0.3",
