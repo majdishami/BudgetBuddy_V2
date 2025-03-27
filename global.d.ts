@@ -1,4 +1,3 @@
-// global.d.ts
 declare module 'class-variance-authority' {
     import { cva } from 'class-variance-authority';
     export { cva };
@@ -27,4 +26,10 @@ declare module 'class-variance-authority' {
   
   declare module 'date-fns-tz' {
     export * from 'date-fns-tz';
+  }
+  
+  declare module '@vitejs/plugin-react' {
+    import { Plugin } from 'vite';
+    const plugin: () => Plugin;
+    export default plugin;
   }
