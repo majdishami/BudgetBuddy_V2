@@ -3,7 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "workspaces": ["client"],
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "npm run build --workspace=client",
@@ -11,7 +13,7 @@
     "server": "node server/index.ts",
     "client": "npm run dev --workspace=client",
     "lint": "npm run lint --workspaces",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -31,6 +33,7 @@
     "@types/node": "^22.13.13",
     "concurrently": "^8.2.2",
     "husky": "^8.0.3",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "vite": "^6.2.3"
   }
 }
